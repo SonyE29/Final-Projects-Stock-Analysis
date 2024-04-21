@@ -75,3 +75,31 @@ print("\nCorrelation Matrix:")
 print(correlation_matrix)
 print("\nMonthly Aggregated Data:")
 print(monthly_data)
+
+# Extra Features
+# Extra Task 1: Calculate returns over time for each company and visualize them in a chart
+nvda_df['NVDA Returns'] = nvda_df['NVDA Adj Close'].pct_change()
+intc_df['INTC Returns'] = intc_df['INTC Adj Close'].pct_change()
+
+plt.figure(figsize=(10, 5))
+plt.plot(nvda_df.index, nvda_df['NVDA Returns'], label='NVDA Returns')
+plt.plot(intc_df.index, intc_df['INTC Returns'], label='INTC Returns')
+plt.xlabel('Date')
+plt.ylabel('Returns')
+plt.title('Returns Over Time')
+plt.legend()
+plt.show()
+
+# Extra Task 2: Identify and print top 5 dates with highest trading volume
+top_volume_dates = merged_df.nlargest(5, 'Total Volume').index
+print("Top 5 Dates with Highest Trading Volume:")
+print(top_volume_dates)
+
+# Extra Task 3: Volatility Analysis
+# Calculate standard deviation of returns
+nvda_volatility = nvda_df['NVDA Returns'].std()
+intc_volatility = intc_df['INTC Returns'].std()
+
+print("Volatility (Standard Deviation of Returns):")
+print("NVDA Volatility:", nvda_volatility)
+print("INTC Volatility:", intc_volatility)
