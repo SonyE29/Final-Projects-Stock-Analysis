@@ -1,66 +1,77 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-# Read
-df_INTC=pd.read_csv('INTC.csv')  
-print("INTC:\n",df_INTC,type(df_INTC))       
-df_NVDA=pd.read_csv('NVDA.csv')
-print("NVDA:\n",df_NVDA,type(df_NVDA))
-#convert date to datetime
-df_INTC['Date']=pd.to_datetime(df_INTC['Date'])
-df_NVDA['Date']=pd.to_datetime(df_NVDA['Date'])
-# missing data
-df_INTC['Adj Close'].fillna(method='ffill', inplace=True) 
-df_NVDA['Adj Close'].fillna(method='ffill', inplace=True)
+from matplotlib.dates import DateFormatter
 
-# Calculating basic statistics 
-print(df_INTC.describe())
-print(df_NVDA.describe())
+# Task 1: Data Loading and Cleaning
+# Read CSV files into separate pandas DataFrames
+nvda_df = pd.read_csv('NVDA.csv')
+intc_df = pd.read_csv('INTC.csv')
 
-#trends of INTC Date and Closing price
-plt.figure(figsize=(10,6))
-plt.plot(df_INTC['Date'],df_INTC['Adj Close'],label='INTC')
-plt.title('Adj Closing Price Over Time-INTC')
+# Handle missing values and duplicates
+nvda_df.dropna(inplace=True)
+nvda_df.drop_duplicates(inplace=True)
+intc_df.dropna(inplace=True)
+intc_df.drop_duplicates(inplace=True)
+
+# Convert 'Date' column to datetime format
+nvda_df['Date'] = pd.to_datetime(nvda_df['Date'], format='%m/%d/%Y')
+intc_df['Date'] = pd.to_datetime(intc_df['Date'], format='%m/%d/%Y')
+
+# Set 'Date' column as index
+nvda_df.set_index('Date', inplace=True)
+intc_df.set_index('Date', inplace=True)
+
+# Task 2: Exploratory Data Analysis (EDA)
+# Visualize trend of adjusted closing prices and volume
+plt.figure(figsize=(12, 6))
+plt.subplot(2, 1, 1)
+plt.plot(nvda_df.index, nvda_df['NVDA Adj Close'], label='NVDA')
+plt.plot(intc_df.index, intc_df['INTC Adj Close'], label='INTC')
 plt.xlabel('Date')
-plt.ylabel('Adj Close')
+plt.ylabel('Adjusted Closing Price')
+plt.title('Adjusted Closing Prices Over Time')
 plt.legend()
-plt.show()
-# Trends of INTC Date and volume
-plt.figure(figsize=(10,6))
-plt.plot(df_INTC['Date'],df_INTC['Volume'],label='INTC')
-plt.title('Volume Over Time-INTC')
+
+plt.subplot(2, 1, 2)
+plt.plot(nvda_df.index, nvda_df['NVDA Volume'], label='NVDA')
+plt.plot(intc_df.index, intc_df['INTC Volume'], label='INTC')
 plt.xlabel('Date')
 plt.ylabel('Volume')
+plt.title('Volume Traded Over Time')
 plt.legend()
+
+# Format date ticks as 'year-month-day'
+plt.gca().xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
+
+plt.tight_layout()
 plt.show()
 
-# #  Trends for NVDA Date and closing price
-plt.figure(figsize=(10,6))
-plt.plot(df_NVDA['Date'],df_NVDA['Adj Close'],label='NVDA')
-plt.title('Adj Closing Price Over Time-NVDA')
-plt.xlabel('Date')
-plt.ylabel('Adj Close')
-plt.legend()
-plt.show()
-# # Trends for NVDA Date and volume
-# plt.figure(figsize=(10,6))
-# plt.plot(df_NVDA['Date'],df_NVDA['Volume'],label='NVDA')
-# plt.title('Volume Over Time-NVDA')
-# plt.xlabel('Date')
-# plt.ylabel('Volume')
-# plt.legend()
-# plt.show()
+# Task 3: Data Manipulation and Aggregation
+# Merge DataFrames on 'Date' column
+merged_df = pd.merge(nvda_df, intc_df, left_index=True, right_index=True, suffixes=('_NVDA', '_INTC'))
 
-# Merge
-merged_1=pd.merge(df_INTC, df_NVDA,on='Date')
-print("merged on date:\n",merged_1)
-df=merged_1
+# Create new columns for total volume traded and average adjusted closing price
+merged_df['Total Volume'] = merged_df['NVDA Volume'] + merged_df['INTC Volume']
+merged_df['Avg Adj Close'] = (merged_df['NVDA Adj Close'] + merged_df['INTC Adj Close']) / 2
 
-# Extract columes
-print("df.columns:\n",df_INTC.columns)
-print("df.columns:\n",df_NVDA.columns)
+# Aggregate data to calculate monthly average adjusted closing prices and total volume traded
+monthly_data = merged_df.resample('M').agg({'Avg Adj Close': 'mean', 'Total Volume': 'sum'})
 
-# # Create new columns to calculate total volume traded and average adjusted closing price
-df['Total Volume'] = df(Index['Volume']+Index['Volume'])
-# df['Avg Adj Close'] = (df['Adj Close_NVDA'] + df['Adj Close_INTC']) / 2
+# Task 4: Advanced Analysis with Numpy and Pandas
+# Compute correlation matrix between adjusted closing prices
+correlation_matrix = merged_df[['NVDA Adj Close', 'INTC Adj Close']].corr()
 
+# Calculate rolling statistics
+merged_df['NVDA Adj Close Rolling Mean'] = merged_df['NVDA Adj Close'].rolling(window=5).mean()
+merged_df['NVDA Adj Close Rolling Std'] = merged_df['NVDA Adj Close'].rolling(window=5).std()
+
+# Print results
+print("NVDA Basic Statistics:")
+print(nvda_df.describe())
+print("\nINTC Basic Statistics:")
+print(intc_df.describe())
+print("\nCorrelation Matrix:")
+print(correlation_matrix)
+print("\nMonthly Aggregated Data:")
+print(monthly_data)
