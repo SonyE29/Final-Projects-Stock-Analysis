@@ -65,6 +65,8 @@ correlation_matrix = merged_df[['NVDA Adj Close', 'INTC Adj Close']].corr()
 # Calculate rolling statistics
 merged_df['NVDA Adj Close Rolling Mean'] = merged_df['NVDA Adj Close'].rolling(window=5).mean()
 merged_df['NVDA Adj Close Rolling Std'] = merged_df['NVDA Adj Close'].rolling(window=5).std()
+merged_df['INTC Adj Close Rolling Mean'] = merged_df['INTC Adj Close'].rolling(window=5).mean()
+merged_df['INTC Adj Close Rolling Std'] = merged_df['INTC Adj Close'].rolling(window=5).std()
 
 # Print results
 print("NVDA Basic Statistics:")
@@ -75,6 +77,14 @@ print("\nCorrelation Matrix:")
 print(correlation_matrix)
 print("\nMonthly Aggregated Data:")
 print(monthly_data)
+print("\nNVDA 5-day Rolling Mean:")
+print(merged_df['NVDA Adj Close Rolling Mean'])
+print("\nNVDA 5-day Rolling Std:")
+print(merged_df['NVDA Adj Close Rolling Std'])
+print("\nINTC 5-day Rolling Mean:")
+print(merged_df['INTC Adj Close Rolling Mean'])
+print("\nINTC 5-day Rolling Std:")
+print(merged_df['INTC Adj Close Rolling Std'])
 
 # Extra Features
 # Extra Task 1: Calculate returns over time for each company and visualize them in a chart
